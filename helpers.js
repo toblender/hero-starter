@@ -199,6 +199,22 @@ helpers.findNearestHealthWell = function(gameData) {
   return pathInfoObject.direction;
 };
 
+//Show some details
+helpers.findNearestHealthWellInfo = function(gameData) {
+  var hero = gameData.activeHero;
+  var board = gameData.board;
+
+  //Get the path info object
+  var pathInfoObject = helpers.findNearestObjectDirectionAndDistance(board, hero, function(healthWellTile) {
+    return healthWellTile.type === 'HealthWell';
+  });
+
+  //Return the direction that needs to be taken to achieve the goal
+  return pathInfoObject;
+};
+
+
+
 // Returns the direction of the nearest enemy with lower health
 // (or returns false if there are no accessible enemies that fit this description)
 helpers.findNearestWeakerEnemy = function(gameData) {
@@ -231,6 +247,22 @@ helpers.findNearestEnemy = function(gameData) {
   return pathInfoObject.direction;
 };
 
+//Another helper function
+helpers.findNearestEnemyInfo = function(gameData) {
+  var hero = gameData.activeHero;
+  var board = gameData.board;
+
+  //Get the path info object
+  var pathInfoObject = helpers.findNearestObjectDirectionAndDistance(board, hero, function(enemyTile) {
+    return enemyTile.type === 'Hero' && enemyTile.team !== hero.team
+  });
+
+  //Return the direction that needs to be taken to achieve the goal
+  return pathInfoObject;
+};
+
+
+
 // Returns the direction of the nearest friendly champion
 // (or returns false if there are no accessible friendly champions)
 helpers.findNearestTeamMember = function(gameData) {
@@ -245,5 +277,19 @@ helpers.findNearestTeamMember = function(gameData) {
   //Return the direction that needs to be taken to achieve the goal
   return pathInfoObject.direction;
 };
+
+helpers.findNearestTeamMemberInfo = function(gameData) {
+  var hero = gameData.activeHero;
+  var board = gameData.board;
+
+  //Get the path info object
+  var pathInfoObject = helpers.findNearestObjectDirectionAndDistance(board, hero, function(heroTile) {
+    return heroTile.type === 'Hero' && heroTile.team === hero.team;
+  });
+
+  //Return the direction that needs to be taken to achieve the goal
+  return pathInfoObject;
+};
+
 
 module.exports = helpers;

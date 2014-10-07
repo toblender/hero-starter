@@ -28,25 +28,88 @@ var heroMoveFunction = require('./hero.js');
 //The move function ("brain") the practice enemy will use
 var enemyMoveFunction = function(gameData, helpers) {
   //Move in a random direction
-  var choices = ['North', 'South', 'East', 'West'];
-  return choices[Math.floor(Math.random()*4)];
+//  var choices = ['North', 'South', 'East', 'West'];
+//  return choices[Math.floor(Math.random()*4)];
+//We are all heroes to someone...
+   var myHero = gameData.activeHero;
+   if (myHero.health < 30) {
+     return helpers.findNearestHealthWell(gameData);
+   } else {
+     return helpers.findNearestEnemy(gameData);
+   }
+
 }
 
 //Makes a new game with a 5x5 board
-var game = new Game(5);
+var boardSize =12 
+var game = new Game(12);
 
+function addWells(game){
+	game.addHealthWell(3,3);
+	game.addHealthWell(8,8);
+	game.addHealthWell(3,8);
+	game.addHealthWell(8,3);
+}
+
+function addDiamonds(game){
+	game.addDiamondMine(5,0);
+	game.addDiamondMine(6,0);
+	game.addDiamondMine(0,5);
+	game.addDiamondMine(0,6);
+	game.addDiamondMine(11,5);
+	game.addDiamondMine(11,6);
+	game.addDiamondMine(5,11);
+	game.addDiamondMine(6,11);
+	game.addDiamondMine(9,5);
+	game.addDiamondMine(9,6);
+	game.addDiamondMine(5,5);
+	game.addDiamondMine(6,5);
+}
+
+function addTrees(game){
+	for (var i=1;i<boardSize-1;i++){
+		game.addImpassable(1,i);
+	}
+	for (var i=2;i<boardSize-1;i++){
+		game.addImpassable(10,i);
+	}
+	game.addImpassable(4,4);
+	game.addImpassable(7,4);
+	game.addImpassable(7,6);
+	game.addImpassable(4,6);
+	
+	game.addImpassable(10,5);
+	game.addImpassable(10,6);
+
+	game.addImpassable(1,5);
+	game.addImpassable(1,6);
+}
+
+function drawBoard(game){
+	addWells(game);
+	addDiamonds(game);
+	addTrees(game);
+	console.log('Game info:%j',game);
+}
+
+drawBoard(game);
+
+/*
 //Add a health well in the middle of the board
 game.addHealthWell(2,2);
 
 //Add diamond mines on either side of the health well
 game.addDiamondMine(2,1);
 game.addDiamondMine(2,3);
-
+*/
 //Add your hero in the top left corner of the map (team 0)
 game.addHero(0, 0, 'MyHero', 0);
+game.addHero(11, 11, 'Team', 0);
 
 //Add an enemy hero in the bottom left corner of the map (team 1)
-game.addHero(4, 4, 'Enemy', 1);
+game.addHero(1, 1, 'Enemy', 1);
+game.addHero(11, 8, 'Enemy', 1);
+game.addHero(11, 10, 'Enemy', 1);
 
 console.log('About to start the game!  Here is what the board looks like:');
 
@@ -56,11 +119,16 @@ console.log('About to start the game!  Here is what the board looks like:');
 game.board.inspect();
 
 //Play a very short practice game
-var turnsToPlay = 15;
+var turnsToPlay = 100;
 
 for (var i=0; i<turnsToPlay; i++) {
   var hero = game.activeHero;
   var direction;
+
+  if(game.activeHero.won){
+	console.log('Game over....<<<<<<<<<<<<<<<<<<<<<<<');
+	break;
+  }
   if (hero.name === 'MyHero') {
 
     //Ask your hero brain which way it wants to move

@@ -48,14 +48,73 @@
 
 // // The "Priest"
 // // This hero will heal nearby friendly champions.
-// var move = function(gameData, helpers) {
-//   var myHero = gameData.activeHero;
-//   if (myHero.health < 60) {
-//     return helpers.findNearestHealthWell(gameData);
-//   } else {
-//     return helpers.findNearestTeamMember(gameData);
-//   }
-// };
+
+
+//Paladin, look for someone to attack, then go heal, and heal friends
+
+
+var dealWithEnemy = function(myHero,enemyInfo,wellInfo){
+	if(enemyInfo){
+
+		if(enemyInfo.distance <= 2){
+			//Always fight and die with honor
+			return enemyInfo.direction;
+		}else if (enemyInfo.distance === 3 && myHero.health === 100){
+			return;
+			//Do nothing, wait for them to come.
+		}else if(enemyInfo.distance > 3 && myHero.health === 100){
+			return enemyInfo.direction;
+		}else if(enemyInfo.direction > 3 && myHero.health < 100){
+			//Health up then go fight
+			return wellInfo.direction;
+		}
+
+	}else{
+		return enemyInfo;
+	}
+}
+
+var dealWithHealth = function(myHero,wellInfo){
+	//If there isn't anyone left to kill
+	if(myHero.health < 100){
+		return wellInfo.direction;
+	}else{
+		return false;
+	}
+}
+
+//Take advantage of move in attack, stay still until person enters your area
+var move = function(gameData, helpers) {
+	var myHero = gameData.activeHero;
+    console.log('Enemy info: %j',helpers.findNearestEnemyInfo(gameData));
+    console.log('Team info: %j',helpers.findNearestTeamMemberInfo(gameData));
+    console.log('Well info: %j',helpers.findNearestHealthWellInfo(gameData));
+	console.log('Hero info: %j',myHero);
+
+	//if enemy is 2 cells away and health === 100, wait
+	//if enemy is 1 cell away, move into enemy
+	//if enemy is more than 2 cells away and health === 100 move towards enemy
+	//if enemy is more than 2 cells away and health < 100 move towards health
+
+	var enemyInfo = helpers.findNearestEnemyInfo(gameData);
+	var wellInfo = helpers.findNearestHealthWellInfo(gameData);
+	var teamInfo = helpers.findNearestTeamMemberInfo(gameData);
+
+	var dealWithEnemyResult = dealWithEnemy(myHero,enemyInfo,wellInfo);
+	var dealWithHealthResult = dealWithHealth(myHero,wellInfo);
+	if(dealWithEnemyResult){
+		console.log('Dealing with enemy:%j',dealWithEnemyResult);
+		return dealWithEnemyResult;
+	}else if(dealWithHealthResult){
+		console.log('Move to health:%j',dealWithHealthResult);
+		return dealWithHealthResult;
+	}else{
+		console.log('Move to team:%j',teamInfo);
+		//Safty in numbers
+		return teamInfo.direction;
+	}
+	
+};
 
 // // The "Unwise Assassin"
 // // This hero will attempt to kill the closest enemy hero. No matter what.
@@ -80,6 +139,7 @@
 // };
 
 // // The "Safe Diamond Miner"
+/*
 var move = function(gameData, helpers) {
   var myHero = gameData.activeHero;
 
@@ -104,7 +164,7 @@ var move = function(gameData, helpers) {
     return helpers.findNearestNonTeamDiamondMine(gameData);
   }
 };
-
+*/
 // // The "Selfish Diamond Miner"
 // // This hero will attempt to capture diamond mines (even those owned by teammates).
 // var move = function(gameData, helpers) {
