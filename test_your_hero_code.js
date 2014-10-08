@@ -25,18 +25,24 @@ var Game = require('./game_logic/Game.js');
 //Get my hero's move function ("brain")
 var heroMoveFunction = require('./hero.js');
 
+var movementAi = require('./ai.js');
+
 //The move function ("brain") the practice enemy will use
-var enemyMoveFunction = function(gameData, helpers) {
+var enemyMoveFunction = function(gameData, helpers, aiType) {
   //Move in a random direction
 //  var choices = ['North', 'South', 'East', 'West'];
 //  return choices[Math.floor(Math.random()*4)];
 //We are all heroes to someone...
+/*
    var myHero = gameData.activeHero;
    if (myHero.health < 30) {
      return helpers.findNearestHealthWell(gameData);
    } else {
      return helpers.findNearestEnemy(gameData);
    }
+*/
+	return movementAi[aiType](gameData,helpers);
+
 
 }
 
@@ -46,9 +52,9 @@ var game = new Game(12);
 
 function addWells(game){
 	game.addHealthWell(3,3);
-	game.addHealthWell(8,8);
+	game.addHealthWell(7,8);
 	game.addHealthWell(3,8);
-	game.addHealthWell(8,3);
+	game.addHealthWell(7,3);
 }
 
 function addDiamonds(game){
@@ -62,8 +68,9 @@ function addDiamonds(game){
 	game.addDiamondMine(6,11);
 	game.addDiamondMine(9,5);
 	game.addDiamondMine(9,6);
+
 	game.addDiamondMine(5,5);
-	game.addDiamondMine(6,5);
+	game.addDiamondMine(5,6);
 }
 
 function addTrees(game){
@@ -74,9 +81,9 @@ function addTrees(game){
 		game.addImpassable(10,i);
 	}
 	game.addImpassable(4,4);
-	game.addImpassable(7,4);
-	game.addImpassable(7,6);
-	game.addImpassable(4,6);
+	game.addImpassable(4,7);
+	game.addImpassable(6,4);
+	game.addImpassable(6,7);
 	
 	game.addImpassable(10,5);
 	game.addImpassable(10,6);
@@ -132,11 +139,18 @@ function generateUnoccupied(game){
 function generateTeam(game){
 	var position = generateUnoccupied(game);
 	game.addHero(position.x,position.y,'MyHero',0);
+
+	for (var i=0;i<9;i++){
+		position = generateUnoccupied(game);
+		game.addHero(position.x,position.y,'Team',0);
+	}
 }
 
 function generateEnemy(game){
-	var position = generateUnoccupied(game);
-	game.addHero(position.x,position.y,'Enemy',1);
+	for (var i=0;i<10;i++){
+		var position = generateUnoccupied(game);
+		game.addHero(position.x,position.y,'Enemy',1);
+	}
 }
 
 generateTeam(game);
@@ -152,27 +166,36 @@ game.board.inspect();
 //Play a very short practice game
 var turnsToPlay = 1250;
 
+var lastActiveHero='';
 for (var i=0; i<turnsToPlay; i++) {
+  if (lastActiveHero === game.activeHero.id){
+	console.log('Game stuck');
+	break;
+  }
   var hero = game.activeHero;
   var direction;
 
   if(game.activeHero.won){
+	console.log('Hero: %s, %j',hero.name,game.activeHero);
 	console.log('Game over....<<<<<<<<<<<<<<<<<<<<<<<');
+	console.log(movementAi.length);
 	break;
   }
   if (hero.name === 'MyHero') {
-
+	console.log('Hero: %s, %j',hero.name,game.activeHero);
     //Ask your hero brain which way it wants to move
     direction = heroMoveFunction(game, helpers);
   } else {
-    direction = enemyMoveFunction(game, helpers);
+    direction = enemyMoveFunction(game, helpers, (hero.id % movementAi.length));
   }
   console.log('-----');
   console.log('Turn ' + i + ':');
   console.log('-----');
-  console.log(hero.name + ' tried to move ' + direction);
+  console.log(hero.getCode()+ ' ' +hero.name + ' tried to move ' + direction);
   console.log(hero.name + ' owns ' + hero.mineCount + ' diamond mines')
   console.log(hero.name + ' has ' + hero.health + ' health')
   game.handleHeroTurn(direction);
   game.board.inspect();
+  //Make sure you aren't stuck
+  lastActiveHero=hero.id;
 }

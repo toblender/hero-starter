@@ -51,12 +51,18 @@
 
 
 //Paladin, look for someone to attack, then go heal, and heal friends
+var randomMove = function(gameData, helpers) {
+  var myHero = gameData.activeHero;
+  var choices = ['North', 'South', 'East', 'West'];
+  return choices[Math.floor(Math.random()*4)];
+};
+
 
 
 var dealWithEnemy = function(myHero,enemyInfo,wellInfo){
 	if(enemyInfo){
 
-		if(enemyInfo.distance <= 2){
+		if(enemyInfo.distance <= 2 && wellInfo > 2){
 			//Always fight and die with honor
 			return enemyInfo.direction;
 		}else if (enemyInfo.distance === 3 && myHero.health === 100){
@@ -102,16 +108,30 @@ var move = function(gameData, helpers) {
 
 	var dealWithEnemyResult = dealWithEnemy(myHero,enemyInfo,wellInfo);
 	var dealWithHealthResult = dealWithHealth(myHero,wellInfo);
-	if(dealWithEnemyResult){
-		console.log('Dealing with enemy:%j',dealWithEnemyResult);
-		return dealWithEnemyResult;
-	}else if(dealWithHealthResult){
-		console.log('Move to health:%j',dealWithHealthResult);
-		return dealWithHealthResult;
+	function beAHero (){
+		if(dealWithEnemyResult){
+			console.log('Dealing with enemy:%j',dealWithEnemyResult);
+			return dealWithEnemyResult;
+		}else if(dealWithHealthResult){
+			console.log('Move to health:%j',dealWithHealthResult);
+			return dealWithHealthResult;
+		}else{
+			//Become unstuck
+
+			if(Math.floor((Math.random() * 100)+1) <= 30){
+				return randomMove(gameData,helpers);	
+			}else if(Math.floor((Math.random() * 100)+1) < 60){
+				return enemyInfo.direction;	
+			}
+			console.log('Move to team:%j',teamInfo);
+			//Safty in numbers
+			return teamInfo.direction;
+		}
+	}
+	if (myHero.lastActiveTurn < 50 || myHero.lastActiveTurn > 210){
+		return beAHero();
 	}else{
-		console.log('Move to team:%j',teamInfo);
-		//Safty in numbers
-		return teamInfo.direction;
+		return wellInfo.direction;
 	}
 	
 };

@@ -113,7 +113,13 @@ Hero.prototype.getCode = function() {
   if (idStr.length === 1) {
     idStr = '0' + idStr;
   }
-  return 'H' + idStr;
+  if(idStr === '00'){
+	return '^_^';
+  }
+  if(this.subType === 'BlackKnight'){
+	  return 'B' + idStr;
+  }
+  return 'A' + idStr;
 };
 
 module.exports = Hero;
