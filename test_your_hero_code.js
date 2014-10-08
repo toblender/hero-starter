@@ -89,7 +89,6 @@ function drawBoard(game){
 	addWells(game);
 	addDiamonds(game);
 	addTrees(game);
-	console.log('Game info:%j',game);
 }
 
 drawBoard(game);
@@ -101,7 +100,6 @@ game.addHealthWell(2,2);
 //Add diamond mines on either side of the health well
 game.addDiamondMine(2,1);
 game.addDiamondMine(2,3);
-*/
 //Add your hero in the top left corner of the map (team 0)
 game.addHero(0, 0, 'MyHero', 0);
 game.addHero(11, 11, 'Team', 0);
@@ -111,6 +109,39 @@ game.addHero(1, 1, 'Enemy', 1);
 game.addHero(11, 8, 'Enemy', 1);
 game.addHero(11, 10, 'Enemy', 1);
 
+*/
+
+function generateUnoccupied(game){
+	function getRand(){
+		//Remember if you do +1 it will over board
+		return Math.floor((Math.random() * boardSize));
+	}
+	var x=0;
+	var y=0;
+	while(true){
+		//Generate 2 numbers, if they are unoccupied return
+		x = getRand();
+		y = getRand();
+		console.log('game board %s,%s, %j',x,y,game.board.tiles[x][y]);
+		if(game.board.tiles[x][y].type === 'Unoccupied'){	
+			return {x:x,y:y};
+		}
+	}
+}
+
+function generateTeam(game){
+	var position = generateUnoccupied(game);
+	game.addHero(position.x,position.y,'MyHero',0);
+}
+
+function generateEnemy(game){
+	var position = generateUnoccupied(game);
+	game.addHero(position.x,position.y,'Enemy',1);
+}
+
+generateTeam(game);
+generateEnemy(game);
+
 console.log('About to start the game!  Here is what the board looks like:');
 
 //You can run game.board.inspect() in this test code at any time
@@ -119,7 +150,7 @@ console.log('About to start the game!  Here is what the board looks like:');
 game.board.inspect();
 
 //Play a very short practice game
-var turnsToPlay = 100;
+var turnsToPlay = 1250;
 
 for (var i=0; i<turnsToPlay; i++) {
   var hero = game.activeHero;
